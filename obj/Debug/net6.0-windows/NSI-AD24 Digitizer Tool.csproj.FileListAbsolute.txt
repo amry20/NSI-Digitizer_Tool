@@ -17,3 +17,22 @@ D:\My Documents\Github\NSI-AD24 Digitizer Tool\obj\Debug\net6.0-windows\ref\NSI-
 D:\My Documents\Github\NSI-AD24 Digitizer Tool\obj\Debug\net6.0-windows\NSI_AD24_Digitizer_Tool.MainForm.resources
 D:\My Documents\Github\NSI-AD24 Digitizer Tool\bin\Debug\net6.0-windows\SimpleTCP.dll
 D:\My Documents\Github\NSI-AD24 Digitizer Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.csproj.CopyComplete
+D:\My Documents\Github\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.exe
+D:\My Documents\Github\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.deps.json
+D:\My Documents\Github\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.runtimeconfig.json
+D:\My Documents\Github\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.dll
+D:\My Documents\Github\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.pdb
+D:\My Documents\Github\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\SimpleTCP.dll
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.csproj.AssemblyReference.cache
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI_AD24_Digitizer_Tool.MainForm.resources
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.csproj.GenerateResource.cache
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.GeneratedMSBuildEditorConfig.editorconfig
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.AssemblyInfoInputs.cache
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.AssemblyInfo.cs
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.csproj.CoreCompileInputs.cache
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.csproj.CopyComplete
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.dll
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\refint\NSI-AD24 Digitizer Tool.dll
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.pdb
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.genruntimeconfig.cache
+D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\ref\NSI-AD24 Digitizer Tool.dll

@@ -212,7 +212,7 @@ namespace NSI_AD24_Digitizer_Tool
                                     }
                                 }
                             }
-                            
+
                         }
                     }
                     Thread.Sleep(500);
@@ -234,7 +234,7 @@ namespace NSI_AD24_Digitizer_Tool
 
         private void Logit(string msg)
         {
-            LogText.AppendText(DateTime.Now.ToString() + " " + msg + Environment.NewLine);
+            LogText.AppendText(DateTime.Now.ToString("HH:MM:ss.fff") + " " + msg + Environment.NewLine);
             LogText.ScrollToCaret();
         }
 
@@ -265,10 +265,9 @@ namespace NSI_AD24_Digitizer_Tool
             {
                 checksum += bytes[i];
             }
-                
+
             checksum ^= 0xFF;
-            byte a = (byte)(checksum + 1);
-            checksum += a;
+            checksum += (byte)(checksum + 1);
             return checksum;
         }
 
@@ -321,6 +320,18 @@ namespace NSI_AD24_Digitizer_Tool
             Marshal.FreeHGlobal(ptr);
 
             return arr;
+        }
+        void ByteArrayToStructure(byte[] bytearray, ref object obj)
+        {
+            int len = Marshal.SizeOf(obj);
+
+            IntPtr i = Marshal.AllocHGlobal(len);
+
+            Marshal.Copy(bytearray, 0, i, len);
+
+            obj = Marshal.PtrToStructure(i, obj.GetType());
+
+            Marshal.FreeHGlobal(i);
         }
     }
 

@@ -86,7 +86,7 @@
             groupBox1.Controls.Add(TCPSelect);
             groupBox1.Location = new Point(12, 3);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(499, 199);
+            groupBox1.Size = new Size(474, 199);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             // 
@@ -94,7 +94,7 @@
             // 
             StatusLabel.AutoSize = true;
             StatusLabel.BackColor = Color.Yellow;
-            StatusLabel.Location = new Point(64, 134);
+            StatusLabel.Location = new Point(66, 134);
             StatusLabel.Name = "StatusLabel";
             StatusLabel.Size = new Size(26, 15);
             StatusLabel.TabIndex = 17;
@@ -261,7 +261,7 @@
             LogText.Location = new Point(12, 430);
             LogText.Name = "LogText";
             LogText.ReadOnly = true;
-            LogText.Size = new Size(499, 190);
+            LogText.Size = new Size(474, 190);
             LogText.TabIndex = 1;
             LogText.Text = "";
             // 
@@ -296,7 +296,7 @@
             groupBox2.Controls.Add(label8);
             groupBox2.Location = new Point(12, 217);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(499, 192);
+            groupBox2.Size = new Size(474, 192);
             groupBox2.TabIndex = 9;
             groupBox2.TabStop = false;
             // 
@@ -428,7 +428,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(523, 632);
+            ClientSize = new Size(497, 632);
             Controls.Add(groupBox2);
             Controls.Add(label7);
             Controls.Add(LogText);
