@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "p58o7Cimxh6V7Z6qdI1K2mAlgJpaMdMS2Xd+n/6ZpSUaGf65VKaPeZz4vwlYUS87EoXIaqf3FCo8uWPJDslDTw==",
+  "dgSpecHash": "4sZC8WljYKB4dRNXs3jacz2CnLeDhYXgK07s/xQqirN6mrm5r4kVdJh8x0uOtl9ugfEXxwxT/f/JDpOeXL0A9g==",
   "success": true,
-  "projectFilePath": "D:\\My Documents\\Github\\NSI-AD24 Digitizer Tool\\NSI-AD24 Digitizer Tool.csproj",
+  "projectFilePath": "D:\\My Documents\\Github\\NSI-Digitizer_Tool\\NSI-AD24 Digitizer Tool.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Formulatrix\\.nuget\\packages\\simpletcp\\1.0.24\\simpletcp.1.0.24.nupkg.sha512"
   ],
