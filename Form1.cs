@@ -7,6 +7,7 @@ using System.Runtime.Intrinsics.X86;
 using System.ComponentModel;
 using System;
 using System.Runtime.InteropServices;
+using System.IO;
 
 namespace NSI_AD24_Digitizer_Tool
 {
@@ -128,7 +129,10 @@ namespace NSI_AD24_Digitizer_Tool
                 clientSocket.ReceiveBufferSize = 1024;
                 try
                 {
-                    Logit("Waiting to connect...");
+                    Logit("Connectiong to the server...Please wait!");
+                    ConnectBtn.Enabled = false;
+                    StatusLabel.BackColor = Color.Yellow;
+                    StatusLabel.Text = "Connecting";
                     await clientSocket.ConnectAsync(HostText.Text, Convert.ToInt32(PortText.Text));
                     if (clientSocket.Connected)
                     {
@@ -141,12 +145,17 @@ namespace NSI_AD24_Digitizer_Tool
                         DoConnection = true;
                         MsgReader.RunWorkerAsync(1);
                     }
+                    else
+                    {
+                        ConnectBtn.Enabled = true;
+                    }
                 }
                 catch (Exception ex)
                 {
                     Logit("Unable to connect, error: " + ex.Message);
                     StatusLabel.Text = "Error!";
                     StatusLabel.BackColor = Color.Red;
+                    ConnectBtn.Enabled = true;
                 }
             }
         }
@@ -169,10 +178,10 @@ namespace NSI_AD24_Digitizer_Tool
                         if (DoHandhsake)
                         {
                             String SoftwareDesc = "Digitizer Tool";
-                            char[] str = new char[32];
+                            char[] str = new char[SoftwareDesc.Length];
                             str = SoftwareDesc.ToCharArray();
                             UInt16 DataLength = 0;
-                            byte[] strb = new byte[32];
+                            byte[] strb = new byte[str.Length];
                             for (int i = 0; i < str.Length; i++)
                             {
                                 strb[i] = (byte)str[i];
@@ -186,30 +195,19 @@ namespace NSI_AD24_Digitizer_Tool
                             if (send_msg(SocketStream, (byte)FrameID.HandshakeFrameID, DataFrame, DataLength) > 0)
                             {
                                 byte[] inStream = new byte[512];
-                                bool IsDataAvailable = false;
-                                SocketStream.ReadTimeout = 1000;
-                                long WaitTimeout = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                                while (!IsDataAvailable)
+                                UInt16 BytesReceived = 0;
+                                byte fr = read_data(inStream, BytesReceived);
+                                if (fr == (byte)FrameID.HandshakeFrameID)
                                 {
-                                    if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - WaitTimeout > 1000)
-                                    {
-                                        Logit("Unable to get response, timeout raised!");
-                                        break;
-                                    }
-                                    if (SocketStream.DataAvailable)
-                                    {
-                                        IsDataAvailable = true;
-                                    }
-                                    Thread.Sleep(1);
+                                    DoHandhsake = false;
                                 }
-                                if (IsDataAvailable)
+                                else if (fr == (byte)FrameID.TextFrameID)
                                 {
-                                    if (SocketStream.Read(inStream, 0, (int)inStream.Length) > 0)
-                                    {
-                                        string msg = System.Text.Encoding.UTF8.GetString(inStream) + Environment.NewLine;
-                                        Logit("Message from server: " + msg);
-                                        DoHandhsake = false;
-                                    }
+                                    DoHandhsake = true;
+                                    char[] inText = new char[512];
+                                    Array.Copy(inStream,0, inText, 0, inStream.Length);
+                                    string msg = new string(inText);
+                                    Logit("Message from device: " + msg);
                                 }
                             }
 
@@ -276,23 +274,24 @@ namespace NSI_AD24_Digitizer_Tool
             byte[] GuardFrame = new byte[6];
             byte[] DataByte = new byte[512];
             UInt16 DataLength = 0;
-            GuardFrameData GuardFrame_Data = new GuardFrameData();
 
-            GuardFrame_Data.StartMessage = (byte)FrameID.StartMessage;
-            GuardFrame_Data.GuardFrame_ID = (byte)FrameID.GuardFrameID;
-            GuardFrame_Data.NextFrame_ID = Nextframe;
-            GuardFrame_Data.NextFrameLength = len;
-
-            GuardFrame = StructureToByteArray(GuardFrame_Data);
-            GuardFrame_Data.checksum = calculate_sum(GuardFrame, GuardFrame.Length - 1);
-            GuardFrame = StructureToByteArray(GuardFrame_Data);
             DataByte[0] = (byte)FrameID.StartMessage;
             DataByte[1] = Nextframe;
             DataLength += 2;
-            Array.Copy(data, 0, DataByte, 2, len);
+            Array.Copy(data, 0, DataByte, DataLength, len);
             DataLength += len;
             DataByte[DataLength] = calculate_sum(DataByte, DataLength);
             DataLength += 1;
+
+            GuardFrame[0] = (byte)FrameID.StartMessage;
+            GuardFrame[1] = (byte)FrameID.GuardFrameID;
+            GuardFrame[2] = Nextframe;
+            GuardFrame[3] = (byte)(DataLength & 0x00FF);
+            GuardFrame[4] = (byte)(DataLength >> 8);
+            byte checksum = calculate_sum(GuardFrame, 5);
+            UInt16 ln = (UInt16)(GuardFrame[3] + (GuardFrame[4] << 8));
+            Logit("Data frame length = " + ln.ToString());
+            GuardFrame[5] = checksum;
             try
             {
                 n.Write(GuardFrame, 0, GuardFrame.Length);
@@ -304,7 +303,126 @@ namespace NSI_AD24_Digitizer_Tool
             }
             return 1;
         }
+        private byte read_data(byte[] data_out, UInt16 RecvLength)
+        {
+            bool IsDataAvailable = false;
+            bool ReadGuardFrame = true;
+            UInt16 DataFrameLength = 0;
+            byte[] RecvData = new byte[512];
+            byte NextFrameID = 0;
+            Array.Clear(RecvData, 0, RecvData.Length);
+            if (ReadGuardFrame)
+            {
+                Logit("Sending guard frame...");
+                if (UseTCPConn)
+                {
+                    SocketStream.ReadTimeout = 1000;
+                }
+                else
+                {
 
+                }
+                long WaitTimeout = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                while (!IsDataAvailable)
+                {
+                    if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - WaitTimeout > 1000)
+                    {
+                        Logit("Unable to get response, timeout raised!");
+                        return (byte)FrameID.NoMessage;
+                    }
+                    if (UseTCPConn)
+                    {
+                        if (SocketStream.DataAvailable)
+                        {
+                            IsDataAvailable = true;
+                            break;
+                        }
+                    }
+                    
+                    Thread.Sleep(1);
+                }
+                if (IsDataAvailable)
+                {
+                    if (UseTCPConn)
+                    {
+                        if (SocketStream.Read(RecvData, 0, 6) > 0)
+                        {
+                            byte checksum = calculate_sum(RecvData, 5);
+                            if ((RecvData[0] == (byte)FrameID.StartMessage) && (RecvData[1] == (byte)FrameID.GuardFrameID) && (checksum == RecvData[5]))
+                            {
+                                NextFrameID = RecvData[2];
+                                DataFrameLength = BitConverter.ToUInt16(RecvData, 3);
+                                Logit("Received guard frame.");
+                                Logit("Next frame ID = " + RecvData[2].ToString());
+                                Logit("Next frame length = " + DataFrameLength);
+                                ReadGuardFrame = false;
+                            }
+                        }
+                    }
+                }
+            }
+            if (ReadGuardFrame == false)
+            {
+                Logit("Reading data frame...");
+                IsDataAvailable = false;
+                Array.Clear(RecvData, 0, RecvData.Length);
+                if (UseTCPConn)
+                {
+                    SocketStream.ReadTimeout = 1000;
+                }
+                else
+                {
+
+                }
+                long WaitTimeout = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                while (!IsDataAvailable)
+                {
+                    if (DateTimeOffset.Now.ToUnixTimeMilliseconds() - WaitTimeout > 1000)
+                    {
+                        Logit("Unable to get response, timeout raised!");
+                        return (byte)FrameID.NoMessage;
+                    }
+                    if (UseTCPConn)
+                    {
+                        if (SocketStream.DataAvailable)
+                        {
+                            IsDataAvailable = true;
+                            break;
+                        }
+                    }
+
+                    Thread.Sleep(1);
+                }
+                if (IsDataAvailable)
+                {
+                    if (UseTCPConn)
+                    {
+                        if (SocketStream.Read(RecvData, 0, DataFrameLength) > 0)
+                        {
+                            byte checksum = calculate_sum(RecvData, DataFrameLength-1);
+                            if ((RecvData[0] == (byte)FrameID.StartMessage) && (RecvData[DataFrameLength-1] == checksum))
+                            {
+                                RecvLength = DataFrameLength;
+                                Logit("Received data frame.");
+                                Array.Clear(data_out, 0, data_out.Length);
+                                Array.Copy(RecvData, 2, data_out, 0, DataFrameLength - 3);
+                                return RecvData[1];
+                            }
+                            else
+                            {
+                                Logit("Data validty check failed!. Calculated checksum = " + checksum.ToString() + " Data checksum = " + data_out[DataFrameLength-1].ToString());
+                            }
+                        }
+                        else
+                        {
+                            Logit("Unable to receive data frame!");
+                        }
+                    }
+                }
+            }
+           
+            return (byte)FrameID.NoMessage;
+        }
         byte[] StructureToByteArray(object obj)
         {
             int len = Marshal.SizeOf(obj);
