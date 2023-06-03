@@ -79,9 +79,18 @@ namespace NSI_AD24_Digitizer_Tool
         {
             InitializeComponent();
         }
-        public bool UseTCPConn = true, DoConnection = true;
+        public class DeviceData
+        {
+            public UInt32 TokenID;
+            public bool IsHandshaked;
+            public byte[] HWVersion = new byte[3], FWVersion = new byte[3];
+            public String VersionRelease, DeviceModel;
+        };
+        public static DeviceData NSIDigitizer = new DeviceData();
+        public static bool UseTCPConn = true, DoConnection = true;
         public System.Net.Sockets.TcpClient clientSocket;
         public NetworkStream SocketStream;
+
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (TCPSelect.Checked)
@@ -102,6 +111,12 @@ namespace NSI_AD24_Digitizer_Tool
         {
             ParitySelect.SelectedIndex = 0;
             BaudSelect.SelectedIndex = 0;
+            MAC0Text.TextAlign = HorizontalAlignment.Center;
+            MAC1Text.TextAlign = HorizontalAlignment.Center;
+            MAC2Text.TextAlign = HorizontalAlignment.Center;
+            MAC3Text.TextAlign = HorizontalAlignment.Center;
+            MAC4Text.TextAlign = HorizontalAlignment.Center;
+            MAC5Text.TextAlign = HorizontalAlignment.Center;
 
         }
 
@@ -168,54 +183,129 @@ namespace NSI_AD24_Digitizer_Tool
         {
             int result = 0;
             byte[] DataFrame = new byte[512];
+            UInt16 DataLength = 0;
+            UInt32 Token = 0;
+            bool DoHandhsake = true;
+            bool DoGetVersion = false;
             if (UseTCPConn)
             {
-                bool DoHandhsake = true;
                 while (clientSocket.Connected)
                 {
                     if (DoConnection)
                     {
-                        if (DoHandhsake)
+                        if (DoHandhsake && !NSIDigitizer.IsHandshaked)
                         {
-                            String SoftwareDesc = "Digitizer Tool";
-                            char[] str = new char[SoftwareDesc.Length];
-                            str = SoftwareDesc.ToCharArray();
-                            UInt16 DataLength = 0;
-                            byte[] strb = new byte[str.Length];
-                            for (int i = 0; i < str.Length; i++)
+                            string SoftwareDesc = "NSI-AD24 Digitizer Tool\0";
+                            byte[] strb = new byte[SoftwareDesc.Length];
+                            for (int i = 0; i < SoftwareDesc.Length; i++)
                             {
-                                strb[i] = (byte)str[i];
+                                strb[i] = (byte)SoftwareDesc[i];
                             }
-                            DataFrame[0] = (byte)Opcode.Handshake;
-                            DataFrame[1] = 100; // Code for digitizer software
-                            DataLength += 2;
-                            Array.Copy(strb, 0, DataFrame, 2, strb.Length);
-                            DataLength += (UInt16)strb.Length;
+                            Array.Clear(DataFrame, 0, DataFrame.Length);
+                            DataFrame[0] = 100; // Code for digitizer software
+                            DataLength += 1;
+                            Array.Copy(strb, 0, DataFrame, DataLength, strb.Length);
+                            DataLength += (UInt16)(strb.Length);
                             Logit("Sending handshake command...");
-                            if (send_msg(SocketStream, (byte)FrameID.HandshakeFrameID, DataFrame, DataLength) > 0)
+                            if (send_command(SocketStream, (byte)Opcode.Handshake, DataFrame, DataLength, Token) > 0)
                             {
                                 byte[] inStream = new byte[512];
                                 UInt16 BytesReceived = 0;
-                                byte fr = read_data(inStream, BytesReceived);
+                                byte fr = read_data(inStream, ref BytesReceived);
                                 if (fr == (byte)FrameID.HandshakeFrameID)
                                 {
+                                    Token = BitConverter.ToUInt32(inStream, 0);
+                                    Logit("Received handshaking response. Data size = " + BytesReceived + " Token ID = " + Token);
                                     DoHandhsake = false;
+                                    DoGetVersion = true;
+                                    NSIDigitizer.IsHandshaked = true;
                                 }
                                 else if (fr == (byte)FrameID.TextFrameID)
                                 {
                                     DoHandhsake = true;
                                     char[] inText = new char[512];
-                                    Array.Copy(inStream,0, inText, 0, inStream.Length);
+                                    Array.Copy(inStream, 0, inText, 0, inStream.Length);
                                     string msg = new string(inText);
                                     Logit("Message from device: " + msg);
+                                    blank_line();
                                 }
                             }
 
+                        }
+                        else if (DoGetVersion && NSIDigitizer.IsHandshaked)
+                        {
+                            Array.Clear(DataFrame, 0, DataFrame.Length);
+                            DataLength = 0;
+                            Logit("Sending get version command...");
+                            if (send_command(SocketStream, (byte)Opcode.GetVersion, DataFrame, DataLength, Token) > 0)
+                            {
+                                byte[] inStream = new byte[512];
+                                UInt16 BytesReceived = 0;
+                                UInt16 LastCharPos = 0;
+                                NSIDigitizer.HWVersion = new byte[3];
+                                NSIDigitizer.FWVersion = new byte[3];
+                                NSIDigitizer.VersionRelease = "";
+                                NSIDigitizer.DeviceModel = "";
+                                byte fr = read_data(inStream, ref BytesReceived);
+                                if (fr == (byte)FrameID.VersionFrameID)
+                                {
+                                    NSIDigitizer.TokenID = BitConverter.ToUInt32(inStream, 0);
+                                    Logit("Received get version response. Data size = " + BytesReceived);
+                                    Array.Copy(inStream, 0, NSIDigitizer.HWVersion, 0, NSIDigitizer.HWVersion.Length);
+                                    Array.Copy(inStream, 3, NSIDigitizer.FWVersion, 0, NSIDigitizer.FWVersion.Length);
+
+                                    for (UInt16 i = 6; i < BytesReceived; i++)
+                                    {
+                                        if (inStream[i] != 0x00)
+                                        {
+                                            NSIDigitizer.VersionRelease += (char)(inStream[i]);
+                                        }
+                                        else
+                                        {
+                                            LastCharPos = (UInt16)(i + 1);
+                                            break;
+                                        }
+                                    }
+                                    for (UInt16 i = LastCharPos; i < BytesReceived; i++)
+                                    {
+                                        if (inStream[i] != 0x00)
+                                        {
+                                            NSIDigitizer.DeviceModel += (char)(inStream[i]);
+                                        }
+                                        else
+                                        {
+                                            LastCharPos = 0;
+                                            break;
+                                        }
+                                    }
+                                    HWLabel.Text = "Board ver." + NSIDigitizer.HWVersion[0].ToString() + '.' + NSIDigitizer.HWVersion[1].ToString() + '.' + NSIDigitizer.HWVersion[2].ToString();
+                                    FWLabel.Text = "FW ver." + NSIDigitizer.FWVersion[0].ToString() + '.' + NSIDigitizer.FWVersion[1].ToString() + '.' + NSIDigitizer.FWVersion[2].ToString() + '_' + NSIDigitizer.VersionRelease;
+                                    ModelLabel.Text = "Model: " + NSIDigitizer.DeviceModel;
+                                    DoGetVersion = false;
+                                    DoConnection = false;
+                                    break;
+                                }
+                                else if (fr == (byte)FrameID.TextFrameID)
+                                {
+                                    DoGetVersion = true;
+                                    char[] inText = new char[512];
+                                    Array.Copy(inStream, 0, inText, 0, inStream.Length);
+                                    string msg = new string(inText);
+                                    Logit("Message from device: " + msg);
+                                    blank_line();
+                                }
+                            }
                         }
                     }
                     Thread.Sleep(500);
                 }
             }
+            Logit("Successfully connected to the device.");
+            ResetBtn.Enabled = true;
+            ClearEEPROMBtn.Enabled = true;
+            RebootBtn.Enabled = true;
+            WriteDataBtn.Enabled = true;
+            NSIDigitizer.TokenID = Token;
             bw.CancelAsync();
             return result;
         }
@@ -229,9 +319,18 @@ namespace NSI_AD24_Digitizer_Tool
                 e.Cancel = true;
             }
         }
+        private void blank_line()
+        {
+            LogText.AppendText(Environment.NewLine);
+            LogText.ScrollToCaret();
 
+        }
         private void Logit(string msg)
         {
+            if (LogText.Lines.Count() >= 200)
+            {
+                LogText.Clear();
+            }
             LogText.AppendText(DateTime.Now.ToString("HH:MM:ss.fff") + " " + msg + Environment.NewLine);
             LogText.ScrollToCaret();
         }
@@ -243,6 +342,14 @@ namespace NSI_AD24_Digitizer_Tool
                 clientSocket.Close();
                 SocketStream.Close();
                 SocketStream.Flush();
+                NSIDigitizer.IsHandshaked = false;
+                HWLabel.Text = "Board ver.0.0.0";
+                FWLabel.Text = "FW ver.0.0.0DBG";
+                ModelLabel.Text = "Model: Unknown";
+                ResetBtn.Enabled = false;
+                ClearEEPROMBtn.Enabled = false;
+                RebootBtn.Enabled = false;
+                WriteDataBtn.Enabled = false;
                 if (!clientSocket.Connected)
                 {
                     StatusLabel.Text = "Idle";
@@ -269,33 +376,56 @@ namespace NSI_AD24_Digitizer_Tool
             return checksum;
         }
 
-        private int send_msg(NetworkStream n, byte Nextframe, byte[] data, UInt16 len)
+        private int send_command(NetworkStream n, byte CMD_Opcode, byte[] data, UInt16 len, UInt32 TokenData)
         {
             byte[] GuardFrame = new byte[6];
             byte[] DataByte = new byte[512];
+            byte[] TokenBytes = new byte[4];
+            byte checksum = 0;
             UInt16 DataLength = 0;
+            Array.Clear(DataByte, 0, DataByte.Length);
+            Array.Clear(GuardFrame, 0, GuardFrame.Length);
+            if (CMD_Opcode == (byte)Opcode.Handshake)
+            {
+                DataByte[0] = (byte)FrameID.StartMessage;
+                DataByte[1] = CMD_Opcode;
+                DataLength += 2;
+                Array.Copy(data, 0, DataByte, DataLength, len);
+                DataLength += (UInt16)(len);
+                checksum = calculate_sum(DataByte, DataLength);
+                DataByte[DataLength] = checksum;
+                DataLength += 1;
+            }
+            else
+            {
+                TokenBytes = BitConverter.GetBytes(TokenData);
+                DataByte[0] = (byte)FrameID.StartMessage;
+                DataByte[1] = CMD_Opcode;
+                DataLength += 2;
+                Array.Copy(TokenBytes, 0, DataByte, 2, TokenBytes.Length);
+                DataLength += (UInt16)TokenBytes.Length;
+                Array.Copy(data, 0, DataByte, DataLength, len);
+                DataLength += (UInt16)len;
+                checksum = calculate_sum(DataByte, DataLength);
+                DataByte[DataLength] = checksum;
+                DataLength += 1;
 
-            DataByte[0] = (byte)FrameID.StartMessage;
-            DataByte[1] = Nextframe;
-            DataLength += 2;
-            Array.Copy(data, 0, DataByte, DataLength, len);
-            DataLength += len;
-            DataByte[DataLength] = calculate_sum(DataByte, DataLength);
-            DataLength += 1;
+            }
 
             GuardFrame[0] = (byte)FrameID.StartMessage;
             GuardFrame[1] = (byte)FrameID.GuardFrameID;
-            GuardFrame[2] = Nextframe;
-            GuardFrame[3] = (byte)(DataLength & 0x00FF);
+            GuardFrame[2] = CMD_Opcode;
+            GuardFrame[3] = (byte)(DataLength & 0xFF);
             GuardFrame[4] = (byte)(DataLength >> 8);
-            byte checksum = calculate_sum(GuardFrame, 5);
-            UInt16 ln = (UInt16)(GuardFrame[3] + (GuardFrame[4] << 8));
-            Logit("Data frame length = " + ln.ToString());
+            checksum = calculate_sum(GuardFrame, 5);
             GuardFrame[5] = checksum;
             try
             {
+                Logit("Sending command, Opcode: " + CMD_Opcode.ToString() + " ,Token ID: " + TokenData.ToString() +" ,Data length = " + DataLength.ToString());
+                Logit("Data frame checksum = " + checksum.ToString() + " Data frame length = " + DataLength);
                 n.Write(GuardFrame, 0, GuardFrame.Length);
                 n.Write(DataByte, 0, DataLength);
+
             }
             catch (Exception e)
             {
@@ -303,7 +433,7 @@ namespace NSI_AD24_Digitizer_Tool
             }
             return 1;
         }
-        private byte read_data(byte[] data_out, UInt16 RecvLength)
+        private byte read_data(byte[] data_out, ref UInt16 RecvLength)
         {
             bool IsDataAvailable = false;
             bool ReadGuardFrame = true;
@@ -313,7 +443,6 @@ namespace NSI_AD24_Digitizer_Tool
             Array.Clear(RecvData, 0, RecvData.Length);
             if (ReadGuardFrame)
             {
-                Logit("Sending guard frame...");
                 if (UseTCPConn)
                 {
                     SocketStream.ReadTimeout = 1000;
@@ -338,7 +467,7 @@ namespace NSI_AD24_Digitizer_Tool
                             break;
                         }
                     }
-                    
+
                     Thread.Sleep(1);
                 }
                 if (IsDataAvailable)
@@ -352,9 +481,7 @@ namespace NSI_AD24_Digitizer_Tool
                             {
                                 NextFrameID = RecvData[2];
                                 DataFrameLength = BitConverter.ToUInt16(RecvData, 3);
-                                Logit("Received guard frame.");
-                                Logit("Next frame ID = " + RecvData[2].ToString());
-                                Logit("Next frame length = " + DataFrameLength);
+                                Logit("Received guard frame. Next frame ID = " + RecvData[2].ToString() + " Next frame length = " + DataFrameLength);
                                 ReadGuardFrame = false;
                             }
                         }
@@ -363,7 +490,6 @@ namespace NSI_AD24_Digitizer_Tool
             }
             if (ReadGuardFrame == false)
             {
-                Logit("Reading data frame...");
                 IsDataAvailable = false;
                 Array.Clear(RecvData, 0, RecvData.Length);
                 if (UseTCPConn)
@@ -399,18 +525,17 @@ namespace NSI_AD24_Digitizer_Tool
                     {
                         if (SocketStream.Read(RecvData, 0, DataFrameLength) > 0)
                         {
-                            byte checksum = calculate_sum(RecvData, DataFrameLength-1);
-                            if ((RecvData[0] == (byte)FrameID.StartMessage) && (RecvData[DataFrameLength-1] == checksum))
+                            byte checksum = calculate_sum(RecvData, DataFrameLength - 1);
+                            if ((RecvData[0] == (byte)FrameID.StartMessage) && (RecvData[DataFrameLength - 1] == checksum))
                             {
                                 RecvLength = DataFrameLength;
-                                Logit("Received data frame.");
                                 Array.Clear(data_out, 0, data_out.Length);
                                 Array.Copy(RecvData, 2, data_out, 0, DataFrameLength - 3);
                                 return RecvData[1];
                             }
                             else
                             {
-                                Logit("Data validty check failed!. Calculated checksum = " + checksum.ToString() + " Data checksum = " + data_out[DataFrameLength-1].ToString());
+                                Logit("Data validty check failed!. Calculated checksum = " + checksum.ToString() + " Data checksum = " + data_out[DataFrameLength - 1].ToString());
                             }
                         }
                         else
@@ -420,7 +545,7 @@ namespace NSI_AD24_Digitizer_Tool
                     }
                 }
             }
-           
+
             return (byte)FrameID.NoMessage;
         }
         byte[] StructureToByteArray(object obj)
@@ -450,6 +575,113 @@ namespace NSI_AD24_Digitizer_Tool
             obj = Marshal.PtrToStructure(i, obj.GetType());
 
             Marshal.FreeHGlobal(i);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (NSIDigitizer.IsHandshaked)
+            {
+                byte[] DataFrame = new byte[512];
+                UInt16 DataLength = 0;
+                try
+                {
+                    if ((send_command(SocketStream, (byte)Opcode.Reboot, DataFrame, DataLength, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
+                    {
+                        Logit("Unabel to reboot device!");
+                    }
+                    else
+                    {
+                        byte[] inStream = new byte[512];
+                        UInt16 BytesReceived = 0;
+                        byte fr = read_data(inStream, ref BytesReceived);
+                        if (fr == (byte)FrameID.TextFrameID)
+                        {
+                            char[] inText = new char[512];
+                            Array.Copy(inStream, 0, inText, 0, inStream.Length);
+                            string msg = new string(inText);
+                            Logit("Message from device: " + msg);
+                            blank_line();
+                        }
+                        else
+                        {
+                            Logit("Rebooting device...Please wait!");
+                            Thread.Sleep(5000);
+                            DisconnectBtn.PerformClick();
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Logit("Error: " + ex.Message);
+                }
+            }
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = MessageBox.Show("Are you sure want to reset all digitizer config?", "Reset digitizer config", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.Yes)
+            {
+                if (NSIDigitizer.IsHandshaked)
+                {
+                    byte[] DataFrame = new byte[512];
+                    UInt16 DataLength = 0;
+                    try
+                    {
+                        if ((send_command(SocketStream, (byte)Opcode.ResetDefault, DataFrame, DataLength, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
+                        {
+                            Logit("Unabel to reboot device!");
+                        }
+                        else
+                        {
+                            byte[] inStream = new byte[512];
+                            UInt16 BytesReceived = 0;
+                            byte fr = read_data(inStream, ref BytesReceived);
+                            if (fr == (byte)FrameID.TextFrameID)
+                            {
+                                char[] inText = new char[512];
+                                Array.Copy(inStream, 0, inText, 0, inStream.Length);
+                                string msg = new string(inText);
+                                Logit("Message from device: " + msg);
+                                blank_line();
+                            }
+                            else
+                            {
+                                Logit("Resetting device...Please wait until reboot!");
+                                DisconnectBtn.PerformClick();
+                            }
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Logit("Error: " + ex.Message);
+                    }
+                }
+            }
+            else if (dialogResult == DialogResult.No)
+            {
+                //do something else
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            DialogResult dialogResult = MessageBox.Show("Are you sure want to clear all EEPROM config?", "EEPROM clear", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.Yes)
+            {
+                //do something
+            }
+            else if (dialogResult == DialogResult.No)
+            {
+                //do something else
+            }
+        }
+
+        private void button1_Click_2(object sender, EventArgs e)
+        {
+            LogText.Clear();
         }
     }
 

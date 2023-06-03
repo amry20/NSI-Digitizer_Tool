@@ -49,19 +49,24 @@
             MsgReader = new System.ComponentModel.BackgroundWorker();
             label7 = new Label();
             groupBox2 = new GroupBox();
-            button4 = new Button();
-            textBox6 = new TextBox();
-            textBox5 = new TextBox();
-            textBox4 = new TextBox();
-            textBox3 = new TextBox();
-            textBox2 = new TextBox();
+            ModelLabel = new Label();
+            HWLabel = new Label();
+            FWLabel = new Label();
+            label11 = new Label();
+            WriteDataBtn = new Button();
+            MAC5Text = new TextBox();
+            MAC4Text = new TextBox();
+            MAC3Text = new TextBox();
+            MAC2Text = new TextBox();
+            MAC1Text = new TextBox();
             label10 = new Label();
-            textBox1 = new TextBox();
+            MAC0Text = new TextBox();
             label9 = new Label();
-            button3 = new Button();
-            button2 = new Button();
-            button1 = new Button();
+            RebootBtn = new Button();
+            ClearEEPROMBtn = new Button();
+            ResetBtn = new Button();
             label8 = new Label();
+            button1 = new Button();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -86,7 +91,7 @@
             groupBox1.Controls.Add(TCPSelect);
             groupBox1.Location = new Point(12, 3);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(474, 199);
+            groupBox1.Size = new Size(474, 208);
             groupBox1.TabIndex = 0;
             groupBox1.TabStop = false;
             // 
@@ -114,7 +119,7 @@
             // 
             DisconnectBtn.AutoSize = true;
             DisconnectBtn.Enabled = false;
-            DisconnectBtn.Location = new Point(147, 162);
+            DisconnectBtn.Location = new Point(97, 163);
             DisconnectBtn.Name = "DisconnectBtn";
             DisconnectBtn.Size = new Size(76, 25);
             DisconnectBtn.TabIndex = 15;
@@ -125,7 +130,7 @@
             // ConnectBtn
             // 
             ConnectBtn.AutoSize = true;
-            ConnectBtn.Location = new Point(66, 162);
+            ConnectBtn.Location = new Point(16, 163);
             ConnectBtn.Name = "ConnectBtn";
             ConnectBtn.Size = new Size(75, 25);
             ConnectBtn.TabIndex = 14;
@@ -258,10 +263,10 @@
             // 
             // LogText
             // 
-            LogText.Location = new Point(12, 430);
+            LogText.Location = new Point(12, 441);
             LogText.Name = "LogText";
             LogText.ReadOnly = true;
-            LogText.Size = new Size(474, 190);
+            LogText.Size = new Size(474, 179);
             LogText.TabIndex = 1;
             LogText.Text = "";
             // 
@@ -273,7 +278,7 @@
             // 
             label7.AutoSize = true;
             label7.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            label7.Location = new Point(12, 412);
+            label7.Location = new Point(12, 419);
             label7.Name = "label7";
             label7.Size = new Size(30, 15);
             label7.TabIndex = 8;
@@ -281,18 +286,22 @@
             // 
             // groupBox2
             // 
-            groupBox2.Controls.Add(button4);
-            groupBox2.Controls.Add(textBox6);
-            groupBox2.Controls.Add(textBox5);
-            groupBox2.Controls.Add(textBox4);
-            groupBox2.Controls.Add(textBox3);
-            groupBox2.Controls.Add(textBox2);
+            groupBox2.Controls.Add(ModelLabel);
+            groupBox2.Controls.Add(HWLabel);
+            groupBox2.Controls.Add(FWLabel);
+            groupBox2.Controls.Add(label11);
+            groupBox2.Controls.Add(WriteDataBtn);
+            groupBox2.Controls.Add(MAC5Text);
+            groupBox2.Controls.Add(MAC4Text);
+            groupBox2.Controls.Add(MAC3Text);
+            groupBox2.Controls.Add(MAC2Text);
+            groupBox2.Controls.Add(MAC1Text);
             groupBox2.Controls.Add(label10);
-            groupBox2.Controls.Add(textBox1);
+            groupBox2.Controls.Add(MAC0Text);
             groupBox2.Controls.Add(label9);
-            groupBox2.Controls.Add(button3);
-            groupBox2.Controls.Add(button2);
-            groupBox2.Controls.Add(button1);
+            groupBox2.Controls.Add(RebootBtn);
+            groupBox2.Controls.Add(ClearEEPROMBtn);
+            groupBox2.Controls.Add(ResetBtn);
             groupBox2.Controls.Add(label8);
             groupBox2.Location = new Point(12, 217);
             groupBox2.Name = "groupBox2";
@@ -300,135 +309,196 @@
             groupBox2.TabIndex = 9;
             groupBox2.TabStop = false;
             // 
-            // button4
+            // ModelLabel
             // 
-            button4.AutoSize = true;
-            button4.Location = new Point(20, 128);
-            button4.Name = "button4";
-            button4.Size = new Size(114, 25);
-            button4.TabIndex = 23;
-            button4.Text = "Write Factory Data";
-            button4.UseVisualStyleBackColor = true;
+            ModelLabel.AutoSize = true;
+            ModelLabel.Location = new Point(86, 34);
+            ModelLabel.Name = "ModelLabel";
+            ModelLabel.Size = new Size(98, 15);
+            ModelLabel.TabIndex = 27;
+            ModelLabel.Text = "Model: Unknown";
             // 
-            // textBox6
+            // HWLabel
             // 
-            textBox6.CharacterCasing = CharacterCasing.Upper;
-            textBox6.Location = new Point(315, 99);
-            textBox6.MaxLength = 2;
-            textBox6.Name = "textBox6";
-            textBox6.Size = new Size(36, 23);
-            textBox6.TabIndex = 22;
+            HWLabel.AutoSize = true;
+            HWLabel.Location = new Point(86, 19);
+            HWLabel.Name = "HWLabel";
+            HWLabel.Size = new Size(84, 15);
+            HWLabel.TabIndex = 26;
+            HWLabel.Text = "Board ver.0.0.0";
             // 
-            // textBox5
+            // FWLabel
             // 
-            textBox5.CharacterCasing = CharacterCasing.Upper;
-            textBox5.Location = new Point(273, 99);
-            textBox5.MaxLength = 2;
-            textBox5.Name = "textBox5";
-            textBox5.Size = new Size(36, 23);
-            textBox5.TabIndex = 21;
+            FWLabel.AutoSize = true;
+            FWLabel.Location = new Point(189, 19);
+            FWLabel.Name = "FWLabel";
+            FWLabel.Size = new Size(93, 15);
+            FWLabel.TabIndex = 25;
+            FWLabel.Text = "FW ver.0.0.0DBG";
             // 
-            // textBox4
+            // label11
             // 
-            textBox4.CharacterCasing = CharacterCasing.Upper;
-            textBox4.Location = new Point(231, 99);
-            textBox4.MaxLength = 2;
-            textBox4.Name = "textBox4";
-            textBox4.Size = new Size(36, 23);
-            textBox4.TabIndex = 20;
+            label11.AutoSize = true;
+            label11.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            label11.Location = new Point(17, 19);
+            label11.Name = "label11";
+            label11.Size = new Size(62, 15);
+            label11.TabIndex = 24;
+            label11.Text = "Device ID";
             // 
-            // textBox3
+            // WriteDataBtn
             // 
-            textBox3.CharacterCasing = CharacterCasing.Upper;
-            textBox3.Location = new Point(189, 99);
-            textBox3.MaxLength = 2;
-            textBox3.Name = "textBox3";
-            textBox3.Size = new Size(36, 23);
-            textBox3.TabIndex = 19;
+            WriteDataBtn.AutoSize = true;
+            WriteDataBtn.Enabled = false;
+            WriteDataBtn.Location = new Point(20, 161);
+            WriteDataBtn.Name = "WriteDataBtn";
+            WriteDataBtn.Size = new Size(114, 25);
+            WriteDataBtn.TabIndex = 23;
+            WriteDataBtn.Text = "Write Factory Data";
+            WriteDataBtn.UseVisualStyleBackColor = true;
             // 
-            // textBox2
+            // MAC5Text
             // 
-            textBox2.CharacterCasing = CharacterCasing.Upper;
-            textBox2.Location = new Point(147, 99);
-            textBox2.MaxLength = 2;
-            textBox2.Name = "textBox2";
-            textBox2.Size = new Size(36, 23);
-            textBox2.TabIndex = 18;
+            MAC5Text.CharacterCasing = CharacterCasing.Upper;
+            MAC5Text.Location = new Point(315, 132);
+            MAC5Text.MaxLength = 2;
+            MAC5Text.Name = "MAC5Text";
+            MAC5Text.Size = new Size(36, 23);
+            MAC5Text.TabIndex = 22;
+            // 
+            // MAC4Text
+            // 
+            MAC4Text.CharacterCasing = CharacterCasing.Upper;
+            MAC4Text.Location = new Point(273, 132);
+            MAC4Text.MaxLength = 2;
+            MAC4Text.Name = "MAC4Text";
+            MAC4Text.Size = new Size(36, 23);
+            MAC4Text.TabIndex = 21;
+            // 
+            // MAC3Text
+            // 
+            MAC3Text.CharacterCasing = CharacterCasing.Upper;
+            MAC3Text.Location = new Point(231, 132);
+            MAC3Text.MaxLength = 2;
+            MAC3Text.Name = "MAC3Text";
+            MAC3Text.Size = new Size(36, 23);
+            MAC3Text.TabIndex = 20;
+            // 
+            // MAC2Text
+            // 
+            MAC2Text.CharacterCasing = CharacterCasing.Upper;
+            MAC2Text.Location = new Point(189, 132);
+            MAC2Text.MaxLength = 2;
+            MAC2Text.Name = "MAC2Text";
+            MAC2Text.ReadOnly = true;
+            MAC2Text.Size = new Size(36, 23);
+            MAC2Text.TabIndex = 19;
+            MAC2Text.Text = "DC";
+            // 
+            // MAC1Text
+            // 
+            MAC1Text.CharacterCasing = CharacterCasing.Upper;
+            MAC1Text.Location = new Point(147, 132);
+            MAC1Text.MaxLength = 2;
+            MAC1Text.Name = "MAC1Text";
+            MAC1Text.ReadOnly = true;
+            MAC1Text.Size = new Size(36, 23);
+            MAC1Text.TabIndex = 18;
+            MAC1Text.Text = "08";
             // 
             // label10
             // 
             label10.AutoSize = true;
             label10.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            label10.Location = new Point(20, 102);
+            label10.Location = new Point(20, 135);
             label10.Name = "label10";
             label10.Size = new Size(79, 15);
             label10.TabIndex = 17;
             label10.Text = "MAC Address";
             // 
-            // textBox1
+            // MAC0Text
             // 
-            textBox1.CharacterCasing = CharacterCasing.Upper;
-            textBox1.Location = new Point(105, 99);
-            textBox1.MaxLength = 2;
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(36, 23);
-            textBox1.TabIndex = 13;
+            MAC0Text.CharacterCasing = CharacterCasing.Upper;
+            MAC0Text.Location = new Point(105, 132);
+            MAC0Text.MaxLength = 2;
+            MAC0Text.Name = "MAC0Text";
+            MAC0Text.ReadOnly = true;
+            MAC0Text.Size = new Size(36, 23);
+            MAC0Text.TabIndex = 13;
+            MAC0Text.Text = "00";
             // 
             // label9
             // 
             label9.AutoSize = true;
             label9.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            label9.Location = new Point(16, 77);
+            label9.Location = new Point(16, 110);
             label9.Name = "label9";
             label9.Size = new Size(77, 15);
             label9.TabIndex = 12;
             label9.Text = "Factory Data";
             // 
-            // button3
+            // RebootBtn
             // 
-            button3.AutoSize = true;
-            button3.Location = new Point(277, 37);
-            button3.Name = "button3";
-            button3.Size = new Size(75, 25);
-            button3.TabIndex = 11;
-            button3.Text = "Reboot";
-            button3.UseVisualStyleBackColor = true;
+            RebootBtn.AutoSize = true;
+            RebootBtn.Enabled = false;
+            RebootBtn.Location = new Point(277, 77);
+            RebootBtn.Name = "RebootBtn";
+            RebootBtn.Size = new Size(75, 25);
+            RebootBtn.TabIndex = 11;
+            RebootBtn.Text = "Reboot";
+            RebootBtn.UseVisualStyleBackColor = true;
+            RebootBtn.Click += button3_Click;
             // 
-            // button2
+            // ClearEEPROMBtn
             // 
-            button2.AutoSize = true;
-            button2.Location = new Point(176, 37);
-            button2.Name = "button2";
-            button2.Size = new Size(95, 25);
-            button2.TabIndex = 10;
-            button2.Text = "Clear EEPROM";
-            button2.UseVisualStyleBackColor = true;
+            ClearEEPROMBtn.AutoSize = true;
+            ClearEEPROMBtn.Enabled = false;
+            ClearEEPROMBtn.Location = new Point(176, 77);
+            ClearEEPROMBtn.Name = "ClearEEPROMBtn";
+            ClearEEPROMBtn.Size = new Size(95, 25);
+            ClearEEPROMBtn.TabIndex = 10;
+            ClearEEPROMBtn.Text = "Clear EEPROM";
+            ClearEEPROMBtn.UseVisualStyleBackColor = true;
+            ClearEEPROMBtn.Click += button2_Click;
             // 
-            // button1
+            // ResetBtn
             // 
-            button1.AutoSize = true;
-            button1.Location = new Point(20, 37);
-            button1.Name = "button1";
-            button1.Size = new Size(150, 25);
-            button1.TabIndex = 9;
-            button1.Text = "Reset Config";
-            button1.UseVisualStyleBackColor = true;
+            ResetBtn.AutoSize = true;
+            ResetBtn.Enabled = false;
+            ResetBtn.Location = new Point(20, 77);
+            ResetBtn.Name = "ResetBtn";
+            ResetBtn.Size = new Size(150, 25);
+            ResetBtn.TabIndex = 9;
+            ResetBtn.Text = "Reset Config";
+            ResetBtn.UseVisualStyleBackColor = true;
+            ResetBtn.Click += button1_Click_1;
             // 
             // label8
             // 
             label8.AutoSize = true;
             label8.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            label8.Location = new Point(16, 19);
+            label8.Location = new Point(16, 59);
             label8.Name = "label8";
             label8.Size = new Size(63, 15);
             label8.TabIndex = 8;
             label8.Text = "Command";
+            // 
+            // button1
+            // 
+            button1.Location = new Point(48, 415);
+            button1.Name = "button1";
+            button1.Size = new Size(75, 23);
+            button1.TabIndex = 10;
+            button1.Text = "Clear Log";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click_2;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(497, 632);
+            Controls.Add(button1);
             Controls.Add(groupBox2);
             Controls.Add(label7);
             Controls.Add(LogText);
@@ -436,6 +506,7 @@
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             Name = "MainForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "NSI-AD24 Digitizer Tool v0.0.1DBG";
             Load += MainForm_Load;
             groupBox1.ResumeLayout(false);
@@ -470,17 +541,22 @@
         private Label StatusLabel;
         private Label label1;
         private Label label9;
-        private Button button3;
-        private Button button2;
-        private Button button1;
+        private Button ClearEEPROMBtn;
+        private Button ResetBtn;
         private Label label8;
-        private Button button4;
-        private TextBox textBox6;
-        private TextBox textBox5;
-        private TextBox textBox4;
-        private TextBox textBox3;
-        private TextBox textBox2;
+        private Button WriteDataBtn;
+        private TextBox MAC5Text;
+        private TextBox MAC4Text;
+        private TextBox MAC3Text;
+        private TextBox MAC2Text;
+        private TextBox MAC1Text;
         private Label label10;
-        private TextBox textBox1;
+        private TextBox MAC0Text;
+        private Label ModelLabel;
+        private Label HWLabel;
+        private Label FWLabel;
+        private Label label11;
+        public Button RebootBtn;
+        private Button button1;
     }
 }

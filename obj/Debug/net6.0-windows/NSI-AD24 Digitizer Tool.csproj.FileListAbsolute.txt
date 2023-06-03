@@ -36,3 +36,22 @@ D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\refint\NSI-AD
 D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.pdb
 D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.genruntimeconfig.cache
 D:\My Documents\Github\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\ref\NSI-AD24 Digitizer Tool.dll
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.exe
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.deps.json
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.runtimeconfig.json
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.dll
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.pdb
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\bin\Debug\net6.0-windows\SimpleTCP.dll
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.csproj.AssemblyReference.cache
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI_AD24_Digitizer_Tool.MainForm.resources
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.csproj.GenerateResource.cache
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.GeneratedMSBuildEditorConfig.editorconfig
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.AssemblyInfoInputs.cache
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.AssemblyInfo.cs
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.csproj.CoreCompileInputs.cache
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.csproj.CopyComplete
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.dll
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\refint\NSI-AD24 Digitizer Tool.dll
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.pdb
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\NSI-AD24 Digitizer Tool.genruntimeconfig.cache
+D:\National Seismic Instrument\Project\NSI-AD24 Digitizer\Assorted Prototype\Software\NSI-Digitizer_Tool\obj\Debug\net6.0-windows\ref\NSI-AD24 Digitizer Tool.dll
