@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "6M15NU8Mn8nbsHtMgCasM1JPQ9c96uTDD/bvpHIWXhlN5IqAsFWofx9785aVLoRgIfzICO38lMUCoJ7BYJ5r/g==",
+  "dgSpecHash": "4sZC8WljYKB4dRNXs3jacz2CnLeDhYXgK07s/xQqirN6mrm5r4kVdJh8x0uOtl9ugfEXxwxT/f/JDpOeXL0A9g==",
   "success": true,
-  "projectFilePath": "D:\\National Seismic Instrument\\Project\\NSI-AD24 Digitizer\\Assorted Prototype\\Software\\NSI-Digitizer_Tool\\NSI-AD24 Digitizer Tool.csproj",
+  "projectFilePath": "D:\\My Documents\\Github\\NSI-Digitizer_Tool\\NSI-AD24 Digitizer Tool.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\prisw\\.nuget\\packages\\simpletcp\\1.0.24\\simpletcp.1.0.24.nupkg.sha512"
+    "C:\\Users\\Formulatrix\\.nuget\\packages\\simpletcp\\1.0.24\\simpletcp.1.0.24.nupkg.sha512"
   ],
   "logs": [
     {

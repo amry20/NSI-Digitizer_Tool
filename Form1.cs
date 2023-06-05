@@ -421,7 +421,7 @@ namespace NSI_AD24_Digitizer_Tool
             GuardFrame[5] = checksum;
             try
             {
-                Logit("Sending command, Opcode: " + CMD_Opcode.ToString() + " ,Token ID: " + TokenData.ToString() +" ,Data length = " + DataLength.ToString());
+                Logit("Sending command, Opcode: " + CMD_Opcode.ToString() + " ,Token ID: " + TokenData.ToString() + " ,Data length = " + DataLength.ToString());
                 Logit("Data frame checksum = " + checksum.ToString() + " Data frame length = " + DataLength);
                 n.Write(GuardFrame, 0, GuardFrame.Length);
                 n.Write(DataByte, 0, DataLength);
@@ -631,7 +631,7 @@ namespace NSI_AD24_Digitizer_Tool
                     {
                         if ((send_command(SocketStream, (byte)Opcode.ResetDefault, DataFrame, DataLength, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
                         {
-                            Logit("Unabel to reboot device!");
+                            Logit("Unabel to reset the device!");
                         }
                         else
                         {
@@ -682,6 +682,85 @@ namespace NSI_AD24_Digitizer_Tool
         private void button1_Click_2(object sender, EventArgs e)
         {
             LogText.Clear();
+        }
+
+        private void MAC3Text_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            char c = e.KeyChar;
+
+            if (c != '\b' && !((c <= 0x66 && c >= 61) || (c <= 0x46 && c >= 0x41) || (c >= 0x30 && c <= 0x39)))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void MAC4Text_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            char c = e.KeyChar;
+
+            if (c != '\b' && !((c <= 0x66 && c >= 61) || (c <= 0x46 && c >= 0x41) || (c >= 0x30 && c <= 0x39)))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void MAC5Text_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            char c = e.KeyChar;
+
+            if (c != '\b' && !((c <= 0x66 && c >= 61) || (c <= 0x46 && c >= 0x41) || (c >= 0x30 && c <= 0x39)))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private async void WriteDataBtn_Click(object sender, EventArgs e)
+        {
+            byte[] MACAddress = new byte[6];
+            String hex = "";
+            try
+            {
+                hex = MAC0Text.Text.ToString();
+                MACAddress[0] = Convert.ToByte(hex, 16);
+                hex = "";
+                hex = MAC1Text.Text.ToString();
+                MACAddress[1] = Convert.ToByte(hex, 16);
+                hex = "";
+                hex = MAC2Text.Text.ToString();
+                MACAddress[2] = Convert.ToByte(hex, 16);
+                hex = "";
+                hex = MAC3Text.Text.ToString();
+                MACAddress[3] = Convert.ToByte(hex, 16);
+                hex = "";
+                hex = MAC4Text.Text.ToString();
+                MACAddress[4] = Convert.ToByte(hex, 16);
+                hex = "";
+                hex = MAC5Text.Text.ToString();
+                MACAddress[5] = Convert.ToByte(hex, 16);
+                if ((send_command(SocketStream, (byte)Opcode.WriteFactoryData, MACAddress, 6, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
+                {
+                    Logit("Unabel to write factory data!");
+                }
+                else
+                {
+                    byte[] inStream = new byte[512];
+                    UInt16 BytesReceived = 0;
+                    Logit("writing factory data...Please wait!");
+                    while (read_data(inStream, ref BytesReceived) == (byte) FrameID.NoMessage)
+                    {
+                        Thread.Sleep(1);
+                    }
+                    char[] inText = new char[512];
+                    Array.Copy(inStream, 0, inText, 0, inStream.Length);
+                    string msg = new string(inText);
+                    Logit("Message from device: " + msg);
+                    blank_line();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logit("Error: " + ex.Message);
+            }
         }
     }
 

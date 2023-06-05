@@ -349,13 +349,13 @@
             // WriteDataBtn
             // 
             WriteDataBtn.AutoSize = true;
-            WriteDataBtn.Enabled = false;
             WriteDataBtn.Location = new Point(20, 161);
             WriteDataBtn.Name = "WriteDataBtn";
             WriteDataBtn.Size = new Size(114, 25);
             WriteDataBtn.TabIndex = 23;
             WriteDataBtn.Text = "Write Factory Data";
             WriteDataBtn.UseVisualStyleBackColor = true;
+            WriteDataBtn.Click += WriteDataBtn_Click;
             // 
             // MAC5Text
             // 
@@ -365,6 +365,7 @@
             MAC5Text.Name = "MAC5Text";
             MAC5Text.Size = new Size(36, 23);
             MAC5Text.TabIndex = 22;
+            MAC5Text.KeyPress += MAC5Text_KeyPress;
             // 
             // MAC4Text
             // 
@@ -374,6 +375,7 @@
             MAC4Text.Name = "MAC4Text";
             MAC4Text.Size = new Size(36, 23);
             MAC4Text.TabIndex = 21;
+            MAC4Text.KeyPress += MAC4Text_KeyPress;
             // 
             // MAC3Text
             // 
@@ -383,6 +385,7 @@
             MAC3Text.Name = "MAC3Text";
             MAC3Text.Size = new Size(36, 23);
             MAC3Text.TabIndex = 20;
+            MAC3Text.KeyPress += MAC3Text_KeyPress;
             // 
             // MAC2Text
             // 
