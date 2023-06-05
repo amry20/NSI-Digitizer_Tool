@@ -349,6 +349,7 @@
             // WriteDataBtn
             // 
             WriteDataBtn.AutoSize = true;
+            WriteDataBtn.Enabled = false;
             WriteDataBtn.Location = new Point(20, 161);
             WriteDataBtn.Name = "WriteDataBtn";
             WriteDataBtn.Size = new Size(114, 25);

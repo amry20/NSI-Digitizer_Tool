@@ -90,7 +90,7 @@ namespace NSI_AD24_Digitizer_Tool
         public static bool UseTCPConn = true, DoConnection = true;
         public System.Net.Sockets.TcpClient clientSocket;
         public NetworkStream SocketStream;
-
+        public System.IO.Ports.SerialPort serialPort;
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (TCPSelect.Checked)
@@ -171,6 +171,68 @@ namespace NSI_AD24_Digitizer_Tool
                     StatusLabel.Text = "Error!";
                     StatusLabel.BackColor = Color.Red;
                     ConnectBtn.Enabled = true;
+                }
+            }
+            else
+            {
+                int BaudSpeed = 115200;
+                System.IO.Ports.Parity Par;
+                try
+                {
+                    if (BaudSelect.SelectedIndex == 0)
+                    {
+                        BaudSpeed = 9600;
+                    }
+                    else if (BaudSelect.SelectedIndex == 1)
+                    {
+                        BaudSpeed = 19200;
+                    }
+                    else if (BaudSelect.SelectedIndex == 2)
+                    {
+                        BaudSpeed = 38400;
+                    }
+                    else if (BaudSelect.SelectedIndex == 3)
+                    {
+                        BaudSpeed = 57600;
+                    }
+                    else
+                    {
+                        BaudSpeed = 115200;
+                    }
+                    if (ParitySelect.SelectedIndex == 0)
+                        Par = System.IO.Ports.Parity.None;
+                    else if (ParitySelect.SelectedIndex == 1)
+                    {
+                        Par = System.IO.Ports.Parity.Odd;
+                    }
+                    else
+                    {
+                       Par = System.IO.Ports.Parity.Even;
+                    }
+                    serialPort = new System.IO.Ports.SerialPort(COMText.Text,BaudSpeed,Par);
+                    Logit("Connectiong to the server...Please wait!");
+                    ConnectBtn.Enabled = false;
+                    StatusLabel.BackColor = Color.Yellow;
+                    StatusLabel.Text = "Connecting";
+                    serialPort.Open();
+                    if (serialPort.IsOpen)
+                    {
+                        DisconnectBtn.Enabled = true;
+                        ConnectBtn.Enabled = false;
+                        Logit("Connected to the server.");
+                        StatusLabel.Text = "Success";
+                        StatusLabel.BackColor = Color.LimeGreen;
+                        DoConnection = true;
+                        MsgReader.RunWorkerAsync(1);
+                    }
+                    else
+                    {
+                        ConnectBtn.Enabled = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logit("Error: " + ex.Message);
                 }
             }
         }
@@ -746,7 +808,7 @@ namespace NSI_AD24_Digitizer_Tool
                     byte[] inStream = new byte[512];
                     UInt16 BytesReceived = 0;
                     Logit("writing factory data...Please wait!");
-                    while (read_data(inStream, ref BytesReceived) == (byte) FrameID.NoMessage)
+                    while (read_data(inStream, ref BytesReceived) == (byte)FrameID.NoMessage)
                     {
                         Thread.Sleep(1);
                     }

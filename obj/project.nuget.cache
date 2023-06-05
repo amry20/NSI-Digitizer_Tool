@@ -1,10 +1,17 @@
 {
   "version": 2,
-  "dgSpecHash": "4sZC8WljYKB4dRNXs3jacz2CnLeDhYXgK07s/xQqirN6mrm5r4kVdJh8x0uOtl9ugfEXxwxT/f/JDpOeXL0A9g==",
+  "dgSpecHash": "yuXMCU++Ws2MvJepFdiQR298vsW/CYSN4xiOgPTlOMgvcUhMNUh/qBWle+BiMeEcWM7XwJInfPRgWtOAxR7o7g==",
   "success": true,
   "projectFilePath": "D:\\My Documents\\Github\\NSI-Digitizer_Tool\\NSI-AD24 Digitizer Tool.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Formulatrix\\.nuget\\packages\\simpletcp\\1.0.24\\simpletcp.1.0.24.nupkg.sha512"
+    "C:\\Users\\Formulatrix\\.nuget\\packages\\runtime.linux-arm.runtime.native.system.io.ports\\7.0.0\\runtime.linux-arm.runtime.native.system.io.ports.7.0.0.nupkg.sha512",
+    "C:\\Users\\Formulatrix\\.nuget\\packages\\runtime.linux-arm64.runtime.native.system.io.ports\\7.0.0\\runtime.linux-arm64.runtime.native.system.io.ports.7.0.0.nupkg.sha512",
+    "C:\\Users\\Formulatrix\\.nuget\\packages\\runtime.linux-x64.runtime.native.system.io.ports\\7.0.0\\runtime.linux-x64.runtime.native.system.io.ports.7.0.0.nupkg.sha512",
+    "C:\\Users\\Formulatrix\\.nuget\\packages\\runtime.native.system.io.ports\\7.0.0\\runtime.native.system.io.ports.7.0.0.nupkg.sha512",
+    "C:\\Users\\Formulatrix\\.nuget\\packages\\runtime.osx-arm64.runtime.native.system.io.ports\\7.0.0\\runtime.osx-arm64.runtime.native.system.io.ports.7.0.0.nupkg.sha512",
+    "C:\\Users\\Formulatrix\\.nuget\\packages\\runtime.osx-x64.runtime.native.system.io.ports\\7.0.0\\runtime.osx-x64.runtime.native.system.io.ports.7.0.0.nupkg.sha512",
+    "C:\\Users\\Formulatrix\\.nuget\\packages\\simpletcp\\1.0.24\\simpletcp.1.0.24.nupkg.sha512",
+    "C:\\Users\\Formulatrix\\.nuget\\packages\\system.io.ports\\7.0.0\\system.io.ports.7.0.0.nupkg.sha512"
   ],
   "logs": [
     {

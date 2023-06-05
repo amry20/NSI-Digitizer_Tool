@@ -47,6 +47,10 @@
             "SimpleTCP": {
               "target": "Package",
               "version": "[1.0.24, )"
+            },
+            "System.IO.Ports": {
+              "target": "Package",
+              "version": "[7.0.0, )"
             }
           },
           "imports": [
