@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.IO.Ports;
 
 namespace NSI_AD24_Digitizer_Tool
 {
@@ -249,118 +250,115 @@ namespace NSI_AD24_Digitizer_Tool
             UInt32 Token = 0;
             bool DoHandhsake = true;
             bool DoGetVersion = false;
-            if (UseTCPConn)
+            while (true)
             {
-                while (clientSocket.Connected)
+                if (DoConnection)
                 {
-                    if (DoConnection)
+                    if (DoHandhsake && !NSIDigitizer.IsHandshaked)
                     {
-                        if (DoHandhsake && !NSIDigitizer.IsHandshaked)
+                        string SoftwareDesc = "NSI-AD24 Digitizer Tool\0";
+                        byte[] strb = new byte[SoftwareDesc.Length];
+                        for (int i = 0; i < SoftwareDesc.Length; i++)
                         {
-                            string SoftwareDesc = "NSI-AD24 Digitizer Tool\0";
-                            byte[] strb = new byte[SoftwareDesc.Length];
-                            for (int i = 0; i < SoftwareDesc.Length; i++)
-                            {
-                                strb[i] = (byte)SoftwareDesc[i];
-                            }
-                            Array.Clear(DataFrame, 0, DataFrame.Length);
-                            DataFrame[0] = 100; // Code for digitizer software
-                            DataLength += 1;
-                            Array.Copy(strb, 0, DataFrame, DataLength, strb.Length);
-                            DataLength += (UInt16)(strb.Length);
-                            Logit("Sending handshake command...");
-                            if (send_command(SocketStream, (byte)Opcode.Handshake, DataFrame, DataLength, Token) > 0)
-                            {
-                                byte[] inStream = new byte[512];
-                                UInt16 BytesReceived = 0;
-                                byte fr = read_data(inStream, ref BytesReceived);
-                                if (fr == (byte)FrameID.HandshakeFrameID)
-                                {
-                                    Token = BitConverter.ToUInt32(inStream, 0);
-                                    Logit("Received handshaking response. Data size = " + BytesReceived + " Token ID = " + Token);
-                                    DoHandhsake = false;
-                                    DoGetVersion = true;
-                                    NSIDigitizer.IsHandshaked = true;
-                                }
-                                else if (fr == (byte)FrameID.TextFrameID)
-                                {
-                                    DoHandhsake = true;
-                                    char[] inText = new char[512];
-                                    Array.Copy(inStream, 0, inText, 0, inStream.Length);
-                                    string msg = new string(inText);
-                                    Logit("Message from device: " + msg);
-                                    blank_line();
-                                }
-                            }
-
+                            strb[i] = (byte)SoftwareDesc[i];
                         }
-                        else if (DoGetVersion && NSIDigitizer.IsHandshaked)
+                        Array.Clear(DataFrame, 0, DataFrame.Length);
+                        DataFrame[0] = 100; // Code for digitizer software
+                        DataLength += 1;
+                        Array.Copy(strb, 0, DataFrame, DataLength, strb.Length);
+                        DataLength += (UInt16)(strb.Length);
+                        Logit("Sending handshake command...");
+                        if (send_command(SocketStream,serialPort, (byte)Opcode.Handshake, DataFrame, DataLength, Token) > 0)
                         {
-                            Array.Clear(DataFrame, 0, DataFrame.Length);
-                            DataLength = 0;
-                            Logit("Sending get version command...");
-                            if (send_command(SocketStream, (byte)Opcode.GetVersion, DataFrame, DataLength, Token) > 0)
+                            byte[] inStream = new byte[512];
+                            UInt16 BytesReceived = 0;
+                            byte fr = read_data(inStream, ref BytesReceived);
+                            if (fr == (byte)FrameID.HandshakeFrameID)
                             {
-                                byte[] inStream = new byte[512];
-                                UInt16 BytesReceived = 0;
-                                UInt16 LastCharPos = 0;
-                                NSIDigitizer.HWVersion = new byte[3];
-                                NSIDigitizer.FWVersion = new byte[3];
-                                NSIDigitizer.VersionRelease = "";
-                                NSIDigitizer.DeviceModel = "";
-                                byte fr = read_data(inStream, ref BytesReceived);
-                                if (fr == (byte)FrameID.VersionFrameID)
-                                {
-                                    NSIDigitizer.TokenID = BitConverter.ToUInt32(inStream, 0);
-                                    Logit("Received get version response. Data size = " + BytesReceived);
-                                    Array.Copy(inStream, 0, NSIDigitizer.HWVersion, 0, NSIDigitizer.HWVersion.Length);
-                                    Array.Copy(inStream, 3, NSIDigitizer.FWVersion, 0, NSIDigitizer.FWVersion.Length);
+                                Token = BitConverter.ToUInt32(inStream, 0);
+                                Logit("Received handshaking response. Data size = " + BytesReceived + " Token ID = " + Token);
+                                DoHandhsake = false;
+                                DoGetVersion = true;
+                                NSIDigitizer.IsHandshaked = true;
+                            }
+                            else if (fr == (byte)FrameID.TextFrameID)
+                            {
+                                DoHandhsake = true;
+                                char[] inText = new char[512];
+                                Array.Copy(inStream, 0, inText, 0, inStream.Length);
+                                string msg = new string(inText);
+                                Logit("Message from device: " + msg);
+                                blank_line();
+                            }
+                        }
 
-                                    for (UInt16 i = 6; i < BytesReceived; i++)
-                                    {
-                                        if (inStream[i] != 0x00)
-                                        {
-                                            NSIDigitizer.VersionRelease += (char)(inStream[i]);
-                                        }
-                                        else
-                                        {
-                                            LastCharPos = (UInt16)(i + 1);
-                                            break;
-                                        }
-                                    }
-                                    for (UInt16 i = LastCharPos; i < BytesReceived; i++)
-                                    {
-                                        if (inStream[i] != 0x00)
-                                        {
-                                            NSIDigitizer.DeviceModel += (char)(inStream[i]);
-                                        }
-                                        else
-                                        {
-                                            LastCharPos = 0;
-                                            break;
-                                        }
-                                    }
-                                    HWLabel.Text = "Board ver." + NSIDigitizer.HWVersion[0].ToString() + '.' + NSIDigitizer.HWVersion[1].ToString() + '.' + NSIDigitizer.HWVersion[2].ToString();
-                                    FWLabel.Text = "FW ver." + NSIDigitizer.FWVersion[0].ToString() + '.' + NSIDigitizer.FWVersion[1].ToString() + '.' + NSIDigitizer.FWVersion[2].ToString() + '_' + NSIDigitizer.VersionRelease;
-                                    ModelLabel.Text = "Model: " + NSIDigitizer.DeviceModel;
-                                    DoGetVersion = false;
-                                    DoConnection = false;
-                                    break;
-                                }
-                                else if (fr == (byte)FrameID.TextFrameID)
+                    }
+                    else if (DoGetVersion && NSIDigitizer.IsHandshaked)
+                    {
+                        Array.Clear(DataFrame, 0, DataFrame.Length);
+                        DataLength = 0;
+                        Logit("Sending get version command...");
+                        if (send_command(SocketStream, serialPort, (byte)Opcode.GetVersion, DataFrame, DataLength, Token) > 0)
+                        {
+                            byte[] inStream = new byte[512];
+                            UInt16 BytesReceived = 0;
+                            UInt16 LastCharPos = 0;
+                            NSIDigitizer.HWVersion = new byte[3];
+                            NSIDigitizer.FWVersion = new byte[3];
+                            NSIDigitizer.VersionRelease = "";
+                            NSIDigitizer.DeviceModel = "";
+                            byte fr = read_data(inStream, ref BytesReceived);
+                            if (fr == (byte)FrameID.VersionFrameID)
+                            {
+                                NSIDigitizer.TokenID = BitConverter.ToUInt32(inStream, 0);
+                                Logit("Received get version response. Data size = " + BytesReceived);
+                                Array.Copy(inStream, 0, NSIDigitizer.HWVersion, 0, NSIDigitizer.HWVersion.Length);
+                                Array.Copy(inStream, 3, NSIDigitizer.FWVersion, 0, NSIDigitizer.FWVersion.Length);
+
+                                for (UInt16 i = 6; i < BytesReceived; i++)
                                 {
-                                    DoGetVersion = true;
-                                    char[] inText = new char[512];
-                                    Array.Copy(inStream, 0, inText, 0, inStream.Length);
-                                    string msg = new string(inText);
-                                    Logit("Message from device: " + msg);
-                                    blank_line();
+                                    if (inStream[i] != 0x00)
+                                    {
+                                        NSIDigitizer.VersionRelease += (char)(inStream[i]);
+                                    }
+                                    else
+                                    {
+                                        LastCharPos = (UInt16)(i + 1);
+                                        break;
+                                    }
                                 }
+                                for (UInt16 i = LastCharPos; i < BytesReceived; i++)
+                                {
+                                    if (inStream[i] != 0x00)
+                                    {
+                                        NSIDigitizer.DeviceModel += (char)(inStream[i]);
+                                    }
+                                    else
+                                    {
+                                        LastCharPos = 0;
+                                        break;
+                                    }
+                                }
+                                HWLabel.Text = "Board ver." + NSIDigitizer.HWVersion[0].ToString() + '.' + NSIDigitizer.HWVersion[1].ToString() + '.' + NSIDigitizer.HWVersion[2].ToString();
+                                FWLabel.Text = "FW ver." + NSIDigitizer.FWVersion[0].ToString() + '.' + NSIDigitizer.FWVersion[1].ToString() + '.' + NSIDigitizer.FWVersion[2].ToString() + '_' + NSIDigitizer.VersionRelease;
+                                ModelLabel.Text = "Model: " + NSIDigitizer.DeviceModel;
+                                DoGetVersion = false;
+                                DoConnection = false;
+                                break;
+                            }
+                            else if (fr == (byte)FrameID.TextFrameID)
+                            {
+                                DoGetVersion = true;
+                                char[] inText = new char[512];
+                                Array.Copy(inStream, 0, inText, 0, inStream.Length);
+                                string msg = new string(inText);
+                                Logit("Message from device: " + msg);
+                                blank_line();
                             }
                         }
                     }
-                    Thread.Sleep(500);
                 }
+                Thread.Sleep(500);
             }
             Logit("Successfully connected to the device.");
             ResetBtn.Enabled = true;
@@ -399,29 +397,58 @@ namespace NSI_AD24_Digitizer_Tool
 
         private void DisconnectBtn_Click(object sender, EventArgs e)
         {
-            if (clientSocket.Connected)
+            if (UseTCPConn)
             {
-                clientSocket.Close();
-                SocketStream.Close();
-                SocketStream.Flush();
-                NSIDigitizer.IsHandshaked = false;
-                HWLabel.Text = "Board ver.0.0.0";
-                FWLabel.Text = "FW ver.0.0.0DBG";
-                ModelLabel.Text = "Model: Unknown";
-                ResetBtn.Enabled = false;
-                ClearEEPROMBtn.Enabled = false;
-                RebootBtn.Enabled = false;
-                WriteDataBtn.Enabled = false;
-                if (!clientSocket.Connected)
+                if (clientSocket.Connected)
                 {
-                    StatusLabel.Text = "Idle";
-                    StatusLabel.BackColor = Color.Yellow;
-                    DisconnectBtn.Enabled = false;
-                    ConnectBtn.Enabled = true;
-                    DoConnection = false;
-                    Logit("Disconnected from server.");
+                    clientSocket.Close();
+                    SocketStream.Close();
+                    SocketStream.Flush();
+                    NSIDigitizer.IsHandshaked = false;
+                    HWLabel.Text = "Board ver.0.0.0";
+                    FWLabel.Text = "FW ver.0.0.0DBG";
+                    ModelLabel.Text = "Model: Unknown";
+                    ResetBtn.Enabled = false;
+                    ClearEEPROMBtn.Enabled = false;
+                    RebootBtn.Enabled = false;
+                    WriteDataBtn.Enabled = false;
+                    if (!clientSocket.Connected)
+                    {
+                        StatusLabel.Text = "Idle";
+                        StatusLabel.BackColor = Color.Yellow;
+                        DisconnectBtn.Enabled = false;
+                        ConnectBtn.Enabled = true;
+                        DoConnection = false;
+                        Logit("Disconnected from server.");
+                    }
                 }
             }
+            else
+            {
+                if (serialPort.IsOpen)
+                {
+                    serialPort.Close();
+                    Thread.Sleep(100);
+                    NSIDigitizer.IsHandshaked = false;
+                    HWLabel.Text = "Board ver.0.0.0";
+                    FWLabel.Text = "FW ver.0.0.0DBG";
+                    ModelLabel.Text = "Model: Unknown";
+                    ResetBtn.Enabled = false;
+                    ClearEEPROMBtn.Enabled = false;
+                    RebootBtn.Enabled = false;
+                    WriteDataBtn.Enabled = false;
+                    if (!serialPort.IsOpen)
+                    {
+                        StatusLabel.Text = "Idle";
+                        StatusLabel.BackColor = Color.Yellow;
+                        DisconnectBtn.Enabled = false;
+                        ConnectBtn.Enabled = true;
+                        DoConnection = false;
+                        Logit("Disconnected from server.");
+                    }
+                }
+            }
+           
         }
 
         private byte calculate_sum(byte[] bytes, int len)
@@ -438,7 +465,7 @@ namespace NSI_AD24_Digitizer_Tool
             return checksum;
         }
 
-        private int send_command(NetworkStream n, byte CMD_Opcode, byte[] data, UInt16 len, UInt32 TokenData)
+        private int send_command(NetworkStream n,SerialPort sp, byte CMD_Opcode, byte[] data, UInt16 len, UInt32 TokenData)
         {
             byte[] GuardFrame = new byte[6];
             byte[] DataByte = new byte[512];
@@ -485,8 +512,16 @@ namespace NSI_AD24_Digitizer_Tool
             {
                 Logit("Sending command, Opcode: " + CMD_Opcode.ToString() + " ,Token ID: " + TokenData.ToString() + " ,Data length = " + DataLength.ToString());
                 Logit("Data frame checksum = " + checksum.ToString() + " Data frame length = " + DataLength);
-                n.Write(GuardFrame, 0, GuardFrame.Length);
-                n.Write(DataByte, 0, DataLength);
+                if (UseTCPConn)
+                {
+                    n.Write(GuardFrame, 0, GuardFrame.Length);
+                    n.Write(DataByte, 0, DataLength);
+                }
+                else
+                {
+                    sp.Write(GuardFrame,0,GuardFrame.Length);
+                    sp.Write(DataByte, 0, DataLength);
+                }
 
             }
             catch (Exception e)
@@ -529,23 +564,37 @@ namespace NSI_AD24_Digitizer_Tool
                             break;
                         }
                     }
+                    else
+                    {
+                        if (serialPort.BytesToRead > 0)
+                        {
+                            IsDataAvailable = true;
+                            break;
+                        }
+                    }
 
                     Thread.Sleep(1);
                 }
                 if (IsDataAvailable)
                 {
+                    int rd = 0;
                     if (UseTCPConn)
                     {
-                        if (SocketStream.Read(RecvData, 0, 6) > 0)
+                        rd = SocketStream.Read(RecvData, 0, 6);
+                    }
+                    else
+                    { 
+                        rd = serialPort.Read(RecvData, 0, 6);
+                    }
+                    if (rd > 0)
+                    {
+                        byte checksum = calculate_sum(RecvData, 5);
+                        if ((RecvData[0] == (byte)FrameID.StartMessage) && (RecvData[1] == (byte)FrameID.GuardFrameID) && (checksum == RecvData[5]))
                         {
-                            byte checksum = calculate_sum(RecvData, 5);
-                            if ((RecvData[0] == (byte)FrameID.StartMessage) && (RecvData[1] == (byte)FrameID.GuardFrameID) && (checksum == RecvData[5]))
-                            {
-                                NextFrameID = RecvData[2];
-                                DataFrameLength = BitConverter.ToUInt16(RecvData, 3);
-                                Logit("Received guard frame. Next frame ID = " + RecvData[2].ToString() + " Next frame length = " + DataFrameLength);
-                                ReadGuardFrame = false;
-                            }
+                            NextFrameID = RecvData[2];
+                            DataFrameLength = BitConverter.ToUInt16(RecvData, 3);
+                            Logit("Received guard frame. Next frame ID = " + RecvData[2].ToString() + " Next frame length = " + DataFrameLength);
+                            ReadGuardFrame = false;
                         }
                     }
                 }
@@ -578,32 +627,46 @@ namespace NSI_AD24_Digitizer_Tool
                             break;
                         }
                     }
+                    else
+                    {
+                        if (serialPort.BytesToRead > 0)
+                        {
+                            IsDataAvailable = true;
+                            break;
+                        }
+                    }
 
                     Thread.Sleep(1);
                 }
                 if (IsDataAvailable)
                 {
+                    int rd = 0;
                     if (UseTCPConn)
                     {
-                        if (SocketStream.Read(RecvData, 0, DataFrameLength) > 0)
+                        rd = SocketStream.Read(RecvData, 0, DataFrameLength);
+                    }
+                    else
+                    {
+                        rd = serialPort.Read(RecvData, 0, DataFrameLength);
+                    }
+                    if (rd > 0)
+                    {
+                        byte checksum = calculate_sum(RecvData, DataFrameLength - 1);
+                        if ((RecvData[0] == (byte)FrameID.StartMessage) && (RecvData[DataFrameLength - 1] == checksum))
                         {
-                            byte checksum = calculate_sum(RecvData, DataFrameLength - 1);
-                            if ((RecvData[0] == (byte)FrameID.StartMessage) && (RecvData[DataFrameLength - 1] == checksum))
-                            {
-                                RecvLength = DataFrameLength;
-                                Array.Clear(data_out, 0, data_out.Length);
-                                Array.Copy(RecvData, 2, data_out, 0, DataFrameLength - 3);
-                                return RecvData[1];
-                            }
-                            else
-                            {
-                                Logit("Data validty check failed!. Calculated checksum = " + checksum.ToString() + " Data checksum = " + data_out[DataFrameLength - 1].ToString());
-                            }
+                            RecvLength = DataFrameLength;
+                            Array.Clear(data_out, 0, data_out.Length);
+                            Array.Copy(RecvData, 2, data_out, 0, DataFrameLength - 3);
+                            return RecvData[1];
                         }
                         else
                         {
-                            Logit("Unable to receive data frame!");
+                            Logit("Data validty check failed!. Calculated checksum = " + checksum.ToString() + " Data checksum = " + data_out[DataFrameLength - 1].ToString());
                         }
+                    }
+                    else
+                    {
+                        Logit("Unable to receive data frame!");
                     }
                 }
             }
@@ -647,7 +710,7 @@ namespace NSI_AD24_Digitizer_Tool
                 UInt16 DataLength = 0;
                 try
                 {
-                    if ((send_command(SocketStream, (byte)Opcode.Reboot, DataFrame, DataLength, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
+                    if ((send_command(SocketStream, serialPort, (byte)Opcode.Reboot, DataFrame, DataLength, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
                     {
                         Logit("Unabel to reboot device!");
                     }
@@ -691,7 +754,7 @@ namespace NSI_AD24_Digitizer_Tool
                     UInt16 DataLength = 0;
                     try
                     {
-                        if ((send_command(SocketStream, (byte)Opcode.ResetDefault, DataFrame, DataLength, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
+                        if ((send_command(SocketStream, serialPort, (byte)Opcode.ResetDefault, DataFrame, DataLength, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
                         {
                             Logit("Unabel to reset the device!");
                         }
@@ -799,7 +862,7 @@ namespace NSI_AD24_Digitizer_Tool
                 hex = "";
                 hex = MAC5Text.Text.ToString();
                 MACAddress[5] = Convert.ToByte(hex, 16);
-                if ((send_command(SocketStream, (byte)Opcode.WriteFactoryData, MACAddress, 6, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
+                if ((send_command(SocketStream, serialPort, (byte)Opcode.WriteFactoryData, MACAddress, 6, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
                 {
                     Logit("Unabel to write factory data!");
                 }
