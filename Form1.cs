@@ -774,8 +774,9 @@ namespace NSI_AD24_Digitizer_Tool
                             else
                             {
                                 Logit("Resetting device...Please wait until reboot!");
-                                DisconnectBtn.PerformClick();
+                                
                             }
+                            DisconnectBtn.PerformClick();
                         }
 
                     }
@@ -797,6 +798,41 @@ namespace NSI_AD24_Digitizer_Tool
             if (dialogResult == DialogResult.Yes)
             {
                 //do something
+                if (NSIDigitizer.IsHandshaked)
+                {
+                    byte[] DataFrame = new byte[512];
+                    UInt16 DataLength = 0;
+                    try
+                    {
+                        if ((send_command(SocketStream, serialPort, (byte)Opcode.ClearEEPROMData, DataFrame, DataLength, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
+                        {
+                            Logit("Unabel to clear EEPROM data!");
+                        }
+                        else
+                        {
+                            byte[] inStream = new byte[512];
+                            UInt16 BytesReceived = 0;
+                            byte fr = read_data(inStream, ref BytesReceived);
+                            if (fr == (byte)FrameID.TextFrameID)
+                            {
+                                char[] inText = new char[512];
+                                Array.Copy(inStream, 0, inText, 0, inStream.Length);
+                                string msg = new string(inText);
+                                Logit("Message from device: " + msg);
+                                blank_line();
+                            }
+                            else
+                            {
+                                Logit("Clearing EEPROM data...Please wait!");
+                            }
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Logit("Error: " + ex.Message);
+                    }
+                }
             }
             else if (dialogResult == DialogResult.No)
             {
@@ -862,7 +898,7 @@ namespace NSI_AD24_Digitizer_Tool
                 hex = "";
                 hex = MAC5Text.Text.ToString();
                 MACAddress[5] = Convert.ToByte(hex, 16);
-                if ((send_command(SocketStream, serialPort, (byte)Opcode.WriteFactoryData, MACAddress, 6, NSIDigitizer.TokenID) < 0) || (!clientSocket.Connected))
+                if ((send_command(SocketStream, serialPort, (byte)Opcode.WriteFactoryData, MACAddress, 6, NSIDigitizer.TokenID) < 0))
                 {
                     Logit("Unabel to write factory data!");
                 }
